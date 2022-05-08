@@ -1,0 +1,5 @@
+{
+    "downloadTShirts" : false,
+    "timeBetweenDownloads" : 1,
+    "includeOffSale" : false
+}
