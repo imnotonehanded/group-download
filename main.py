@@ -32,16 +32,19 @@ def deEmojify(text):
 
 def getShirt(id):
     fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
-#print(fr.text)
-for line in re.findall(r'(https?://[^\s]+)', fr.text):
+    #print(fr.text)
+    for line in re.findall(r'(https?://[^\s]+)', fr.text):
         try:
             if line[0:31] == "http://www.roblox.com/asset/?id":
                 assetID = line[32::].replace("</url>", "")
-                file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
-                    'Name'] + ".png", "x")
-                file.write(requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}').text)
+                nm = requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
+                    'Name']
+                file = open( nm+ ".png", "x", encoding="utf-8")
+                print(assetID)
+                requests.put(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}', data = open(nm + ".png", "rb"))
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
         except Exception as e:
+            print(e)
             continue
 
 
