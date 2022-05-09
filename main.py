@@ -37,20 +37,20 @@ def deEmojify(text):
 
 
 def getShirt(id):
-    for line in urllib.request.urlopen(f'https://assetdelivery.roblox.com/v1/asset/?id={id}'):
+    fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
+    print(fr[0])
+    for line in fr:
 
         try:
-            if find(line.decode('iso8859-1'))[0][0:32] == "http://www.roblox.com/asset/?id=":
-                print(found)
+            print(find(line.decode('iso8859-1'))[0])
+            if find(line.decode('iso8859-1'))[0][0:27] == "http://www.roblox.com/asset":
+                print("found")
                 file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={id}').json()[
                     'Name'] + ".png", "x")
-                urllib.request.urlretrieve(
-                    'https://assetdelivery.roblox.com/v1/asset/?id={}'.format(
-                        find(line.decode('iso8859-1'))[0][32::]),
-                    file)
+                print("step 2")
+                urllib.request.urlretrieve('https://assetdelivery.roblox.com/v1/asset/?id={}'.format(find(line.decode('iso8859-1'))[0][32::]),file)
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
         except Exception as e:
-            print(e)
             continue
 
 
