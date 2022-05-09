@@ -41,6 +41,7 @@ def getShirt(id):
 
         try:
             if find(line.decode('iso8859-1'))[0][0:32] == "http://www.roblox.com/asset/?id=":
+                print(found)
                 file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={id}').json()[
                     'Name'] + ".png", "x")
                 urllib.request.urlretrieve(
