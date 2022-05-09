@@ -12,7 +12,7 @@ def find(string):
 
 fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
 print(fr.text)
-for line in fr.readlines():
+for line in fr.readline():
         print(line)
         try:
             if line[5:31] == "http://www.roblox.com/asset/?id":
