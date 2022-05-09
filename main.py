@@ -1,10 +1,11 @@
+from sqlite3 import Cursor
 import urllib.request  # the lib that handles the url stuff
 import xml.etree.ElementTree as ET
 import re
 import requests
 import os
 import colorama
-
+import time
 
 def watermark():
     print("""                                                                                                                    
@@ -20,33 +21,37 @@ $$\   $$ |                              $$ |                                    
  \______/                               \__|                                          \__|                          \n\n""")
 
 
-def deEmojify(text):
-    regrex_pattern = re.compile(pattern="["
-                                        u"\U0001F600-\U0001F64F"  # emoticons
-                                        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                                        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                                        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                                        "]+", flags=re.UNICODE)
-    return regrex_pattern.sub(r'', text)
+def eligble(filename):
+    return "".join([c for c in filename if c.isalpha() or c.isdigit() or c==' ']).rstrip()
 
 
 def getShirt(id):
     fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
-    #print(fr.text)
     for line in re.findall(r'(https?://[^\s]+)', fr.text):
         try:
             if line[0:31] == "http://www.roblox.com/asset/?id":
                 assetID = line[32::].replace("</url>", "")
-                nm = requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
-                    'Name']
-                file = open( nm+ ".png", "x", encoding="utf-8")
-                print(assetID)
-                requests.put(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}', data = open(nm + ".png", "rb"))
+                nm = eligble(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
+                    'Name'])
+                file = open( nm+".png", "x")
+                urllib.request.urlretrieve(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}', os.path.realpath(file.name))
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
+                file.close
         except Exception as e:
             print(e)
             continue
 
+def loopPage(id, cursor):
+    if cursor == None:
+        for i in requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=true&Limit=30&CreatorTargetId={id}").json()["data"]:
+            #4 requests
+            getShirt(i["id"])
+            time.sleep(0.332)
+    else:
+        for i in requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=true&Limit=30&CreatorTargetId={id}&cursor={cursor}").json()["data"]:
+            #4 requests
+            getShirt(i["id"])
+            time.sleep(0.332)
 
 
 def start():
@@ -54,8 +59,19 @@ def start():
     watermark()
     print("\n\n[1] Download Whole Group\n[2] Download Individual Clothing\n[3] Download List of Clothing")
     choice = input("Enter Choice: ")
-    if choice == "2":
-        os.system("cls") or os.system("clear")
+    if choice == "1":
+        os.system("cls")
+        watermark()
+        groupID = input("Enter Group ID: ")
+        while True:
+            cursorret = loopPage(groupID, None)
+            if cursorret:
+                cursor = cursorret
+            else:
+                break
+
+    elif choice == "2":
+        os.system("cls")
         watermark()
         getShirt(input("Enter Clothing ID: "))
 
