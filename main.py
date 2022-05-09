@@ -5,31 +5,26 @@ import requests
 import os
 import colorama
 from colour import Color
+
+
 def find(string):
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
     url = re.findall(regex, string)
     return [x[0] for x in url]
 
-def get_rainbow_colors(length):
-    """ Makes a list of rainbow Colors. """
-    return [
-        Color(hue=i/(length - 1), saturation=1, luminance=0.5)
-        for i in range(length)]
 
-
-def convert_to_hex_colors(colors):
-    """ Convert a list of Color objects to hexadecimal colors. """
-    return [color.get_hex_l() for color in colors]
-
-def convert_to_rainbow_html_string(word):
-    """ Returns a HTML text where the colors of the characters make a rainbow. """
-    rainbow_colors = get_rainbow_colors(len(word))
-    rainbow_colors = convert_to_hex_colors(rainbow_colors)
-    html_str = ''
-    for color, character in zip(rainbow_colors, word):
-        html_str += '<font color="' + color + '">' + character + '</font>'
-
-    return html_str
+def watermark():
+    print("""                                                                                                                    
+                                                                                                                    
+ $$$$$$\   $$$$$$\   $$$$$$\  $$\   $$\  $$$$$$\         $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
+$$  __$$\ $$  __$$\ $$  __$$\ $$ |  $$ |$$  __$$\       $$  __$$\ $$  __$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+$$ /  $$ |$$ |  \__|$$ /  $$ |$$ |  $$ |$$ /  $$ |      $$ |  \__|$$$$$$$$ | $$$$$$$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
+$$ |  $$ |$$ |      $$ |  $$ |$$ |  $$ |$$ |  $$ |      $$ |      $$   ____|$$  __$$ |$$ |  $$ |$$   ____|$$ |      
+\$$$$$$$ |$$ |      \$$$$$$  |\$$$$$$  |$$$$$$$  |      $$ |      \$$$$$$$\ \$$$$$$$ |$$$$$$$  |\$$$$$$$\ $$ |      
+ \____$$ |\__|       \______/  \______/ $$  ____/       \__|       \_______| \_______|$$  ____/  \_______|\__|      
+$$\   $$ |                              $$ |                                          $$ |                          
+\$$$$$$  |                              $$ |                                          $$ |                          
+ \______/                               \__|                                          \__|                          \n\n""")
 
 
 def deEmojify(text):
@@ -48,28 +43,25 @@ def getShirt(id):
         try:
             if find(line.decode('iso8859-1'))[0][0:32] == "http://www.roblox.com/asset/?id=":
                 file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={id}').json()[
-                                'Name'] + ".png", "x")
+                    'Name'] + ".png", "x")
                 urllib.request.urlretrieve(
-                    'https://assetdelivery.roblox.com/v1/asset/?id={}'.format(find(line.decode('iso8859-1'))[0][32::]),
+                    'https://assetdelivery.roblox.com/v1/asset/?id={}'.format(
+                        find(line.decode('iso8859-1'))[0][32::]),
                     os.path.realpath(file.name))
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
         except Exception as e:
             continue
 
-def start():
-    print("""                                                                                                                    
-                                                                                                                    
- $$$$$$\   $$$$$$\   $$$$$$\  $$\   $$\  $$$$$$\         $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
-$$  __$$\ $$  __$$\ $$  __$$\ $$ |  $$ |$$  __$$\       $$  __$$\ $$  __$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
-$$ /  $$ |$$ |  \__|$$ /  $$ |$$ |  $$ |$$ /  $$ |      $$ |  \__|$$$$$$$$ | $$$$$$$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
-$$ |  $$ |$$ |      $$ |  $$ |$$ |  $$ |$$ |  $$ |      $$ |      $$   ____|$$  __$$ |$$ |  $$ |$$   ____|$$ |      
-\$$$$$$$ |$$ |      \$$$$$$  |\$$$$$$  |$$$$$$$  |      $$ |      \$$$$$$$\ \$$$$$$$ |$$$$$$$  |\$$$$$$$\ $$ |      
- \____$$ |\__|       \______/  \______/ $$  ____/       \__|       \_______| \_______|$$  ____/  \_______|\__|      
-$$\   $$ |                              $$ |                                          $$ |                          
-\$$$$$$  |                              $$ |                                          $$ |                          
- \______/                               \__|                                          \__|                          """)
 
+def start():
+
+    watermark()
     print("\n\n[1] Download Whole Group\n[2] Download Individual Clothing\n[3] Download List of Clothing")
     choice = input("Enter Choice: ")
+    if choice == "2":
+        os.system("cls")
+        watermark()
+        getShirt(input("Enter Clothing ID: "))
+
 
 start()
