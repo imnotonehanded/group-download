@@ -4,7 +4,6 @@ import re
 import requests
 import os
 import colorama
-from colour import Color
 
 
 def find(string):
@@ -39,7 +38,7 @@ def deEmojify(text):
 
 def getShirt(id):
     for line in urllib.request.urlopen(f'https://assetdelivery.roblox.com/v1/asset/?id={id}'):
-        line.decode('iso8859-1')
+
         try:
             if find(line.decode('iso8859-1'))[0][0:32] == "http://www.roblox.com/asset/?id=":
                 file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={id}').json()[
@@ -47,10 +46,12 @@ def getShirt(id):
                 urllib.request.urlretrieve(
                     'https://assetdelivery.roblox.com/v1/asset/?id={}'.format(
                         find(line.decode('iso8859-1'))[0][32::]),
-                    os.path.realpath(file.name))
+                    file)
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
         except Exception as e:
+            print(e)
             continue
+
 
 
 def start():
@@ -59,7 +60,7 @@ def start():
     print("\n\n[1] Download Whole Group\n[2] Download Individual Clothing\n[3] Download List of Clothing")
     choice = input("Enter Choice: ")
     if choice == "2":
-        os.system("cls")
+        os.system("cls") or os.system("clear")
         watermark()
         getShirt(input("Enter Clothing ID: "))
 
