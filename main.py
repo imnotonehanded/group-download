@@ -6,12 +6,6 @@ import os
 import colorama
 
 
-def find(string):
-    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
-    url = re.findall(regex, string)
-    return [x[0] for x in url]
-
-
 def watermark():
     print("""                                                                                                                    
                                                                                                                     
@@ -38,17 +32,14 @@ def deEmojify(text):
 
 def getShirt(id):
     fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
-    print(fr[0])
-    for line in fr:
-
+#print(fr.text)
+for line in re.findall(r'(https?://[^\s]+)', fr.text):
         try:
-            print(find(line.decode('iso8859-1'))[0])
-            if find(line.decode('iso8859-1'))[0][0:27] == "http://www.roblox.com/asset":
-                print("found")
-                file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={id}').json()[
+            if line[0:31] == "http://www.roblox.com/asset/?id":
+                assetID = line[32::].replace("</url>", "")
+                file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
                     'Name'] + ".png", "x")
-                print("step 2")
-                urllib.request.urlretrieve('https://assetdelivery.roblox.com/v1/asset/?id={}'.format(find(line.decode('iso8859-1'))[0][32::]),file)
+                file.write(requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}').text)
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
         except Exception as e:
             continue

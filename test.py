@@ -11,16 +11,14 @@ def find(string):
     return [x[0] for x in url]
 
 fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
-print(fr.text)
-for line in fr.readline():
-        print(line)
+#print(fr.text)
+for line in re.findall(r'(https?://[^\s]+)', fr.text):
         try:
-            if line[5:31] == "http://www.roblox.com/asset/?id":
-                print("found")
-                file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={id}').json()[
+            if line[0:31] == "http://www.roblox.com/asset/?id":
+                assetID = line[32::].replace("</url>", "")
+                file = open(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
                     'Name'] + ".png", "x")
-                print("step 2")
-                urllib.request.urlretrieve('https://assetdelivery.roblox.com/v1/asset/?id={}'.format(find(line.decode('iso8859-1'))[0][32::]),file)
+                file.write(requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}').text)
                 print(colorama.Fore.GREEN+"[*] Downloaded!")
         except Exception as e:
             continue
