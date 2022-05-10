@@ -1,4 +1,5 @@
 from sqlite3 import Cursor
+from tokenize import group
 import urllib.request  # the lib that handles the url stuff
 import xml.etree.ElementTree as ET
 import re
@@ -25,33 +26,48 @@ def eligble(filename):
     return "".join([c for c in filename if c.isalpha() or c.isdigit() or c==' ']).rstrip()
 
 
-def getShirt(id):
+def getShirt(id, folder):
     fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
     for line in re.findall(r'(https?://[^\s]+)', fr.text):
+        #print(line)
         try:
             if line[0:31] == "http://www.roblox.com/asset/?id":
                 assetID = line[32::].replace("</url>", "")
+                print(assetID)
                 nm = eligble(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
                     'Name'])
-                file = open( nm+".png", "x")
+                print(nm)
+                if folder != None:
+                    file = open(os.path.join(folder, nm+".png"), "x")
+                else:
+                    file = open(nm+".png", "x")
                 urllib.request.urlretrieve(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}', os.path.realpath(file.name))
-                print(colorama.Fore.GREEN+"[*] Downloaded!")
+                #print(colorama.Fore.GREEN+"[*] Downloaded!")
                 file.close
         except Exception as e:
             print(e)
             continue
 
-def loopPage(id, cursor):
+def loopPage(id, cursor, folder):
     if cursor == None:
-        for i in requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=true&Limit=30&CreatorTargetId={id}").json()["data"]:
+        nonCursor = requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=false&Limit=10&CreatorTargetId={id}").json()
+        for i in nonCursor["data"]:
             #4 requests
-            getShirt(i["id"])
-            time.sleep(0.332)
+            getShirt(i["id"], folder)
+        if nonCursor["nextPageCursor"]:
+            return nonCursor["nextPageCursor"]
+        else: 
+            return False
     else:
-        for i in requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=true&Limit=30&CreatorTargetId={id}&cursor={cursor}").json()["data"]:
+        yCursor = requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=false&Limit=10&CreatorTargetId={id}&cursor={cursor}").json()
+        for j in yCursor["data"]:
             #4 requests
-            getShirt(i["id"])
-            time.sleep(0.332)
+            print(j)
+            getShirt(j["id"], folder)
+        if yCursor["nextPageCursor"]:
+            return yCursor["nextPageCursor"]
+        else: 
+            return False
 
 
 def start():
@@ -63,17 +79,24 @@ def start():
         os.system("cls")
         watermark()
         groupID = input("Enter Group ID: ")
+        cursor = None
+        folder = os.mkdir(str(groupID))
         while True:
-            cursorret = loopPage(groupID, None)
+            print(cursor)
+            cursorret = loopPage(groupID, cursor, os.path.realpath(str(groupID)))
             if cursorret:
+                print(cursor)
                 cursor = cursorret
+                print(cursor)
+                time.sleep(0.022)
             else:
                 break
 
     elif choice == "2":
         os.system("cls")
         watermark()
-        getShirt(input("Enter Clothing ID: "))
+        getShirt(input("Enter Clothing ID: "), None)
 
 
-start()
+#start()
+getShirt("322436466", None)
