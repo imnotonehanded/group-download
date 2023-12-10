@@ -23,25 +23,32 @@ $$\   $$ |                              $$ |                                    
 
 
 def eligble(filename):
+    # checks if the filename can be made a file
     return "".join([c for c in filename if c.isalpha() or c.isdigit() or c==' ']).rstrip()
 
 
 def getShirt(id, folder):
+    #requests roblox api
     fr= requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id}')
     for line in re.findall(r'(https?://[^\s]+)', fr.text):
+        #finds all links
         #print(line)
         try:
             if line[0:31] == "http://www.roblox.com/asset/?id":
                 assetID = line[32::].replace("</url>", "")
                 print(assetID)
+                #gets the asset id
                 nm = eligble(requests.get(f'http://api.roblox.com/Marketplace/ProductInfo?assetId={assetID}').json()[
                     'Name'])
+                #makes sure name isd valid
                 print(nm)
                 if folder != None:
+                    #makes a folder if none
                     file = open(os.path.join(folder, nm+".png"), "x")
                 else:
                     file = open(nm+".png", "x")
                 urllib.request.urlretrieve(f'https://assetdelivery.roblox.com/v1/asset/?id={assetID}', os.path.realpath(file.name))
+                #uses urllib to get the image of the shirt
                 #print(colorama.Fore.GREEN+"[*] Downloaded!")
                 file.close
         except Exception as e:
@@ -49,8 +56,10 @@ def getShirt(id, folder):
             continue
 
 def loopPage(id, cursor, folder):
+    #loops through the pages of api w cursor
     if cursor == None:
         nonCursor = requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=false&Limit=10&CreatorTargetId={id}").json()
+        #checks if theres a cursor
         for i in nonCursor["data"]:
             #4 requests
             getShirt(i["id"], folder)
@@ -59,6 +68,7 @@ def loopPage(id, cursor, folder):
         else: 
             return False
     else:
+        #gets shirt with cursor
         yCursor = requests.get(f"https://catalog.roblox.com/v1/search/items/details?Category=3&CreatorType=2&IncludeNotForSale=false&Limit=10&CreatorTargetId={id}&cursor={cursor}").json()
         for j in yCursor["data"]:
             #4 requests
@@ -73,6 +83,7 @@ def loopPage(id, cursor, folder):
 def start():
 
     watermark()
+    
     print("\n\n[1] Download Whole Group\n[2] Download Individual Clothing\n[3] Download List of Clothing")
     choice = input("Enter Choice: ")
     if choice == "1":
